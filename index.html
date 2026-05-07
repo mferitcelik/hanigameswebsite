@@ -314,6 +314,17 @@ section{padding:100px 0}
 .glow-purple{background:var(--purple)}
 .glow-orange{background:var(--orange)}
 
+/* game screenshot images */
+.game-screenshot{
+  max-height:420px;
+  width:auto;
+  border-radius:20px;
+  position:relative;z-index:2;
+  filter:drop-shadow(0 20px 50px rgba(0,0,0,.5));
+  transition:transform .5s cubic-bezier(.22,1,.36,1);
+}
+.game-card:hover .game-screenshot{transform:translateY(-8px) scale(1.02)}
+
 /* ─── CAREERS ─── */
 .careers{background:var(--bg2);position:relative}
 .careers::before{
@@ -511,43 +522,7 @@ footer{
       </div>
       <div class="game-visual">
         <div class="phone-glow glow-purple"></div>
-        <div class="phone-mockup">
-          <div class="phone-screen cs-screen">
-            <div class="cs-tubes">
-              <div class="tube">
-                <div class="liquid" style="background:#9b59b6"></div>
-                <div class="liquid" style="background:#e74c3c"></div>
-                <div class="liquid" style="background:#9b59b6"></div>
-                <div class="liquid" style="background:#3498db"></div>
-              </div>
-              <div class="tube">
-                <div class="liquid" style="background:#2ecc71"></div>
-                <div class="liquid" style="background:#3498db"></div>
-                <div class="liquid" style="background:#e74c3c"></div>
-                <div class="liquid" style="background:#f1c40f"></div>
-              </div>
-              <div class="tube">
-                <div class="liquid" style="background:#e74c3c"></div>
-                <div class="liquid" style="background:#f1c40f"></div>
-                <div class="liquid" style="background:#2ecc71"></div>
-                <div class="liquid" style="background:#9b59b6"></div>
-              </div>
-              <div class="tube">
-                <div class="liquid" style="background:#3498db"></div>
-                <div class="liquid" style="background:#2ecc71"></div>
-                <div class="liquid" style="background:#f1c40f"></div>
-                <div class="liquid" style="background:#e74c3c"></div>
-              </div>
-              <div class="tube">
-                <div class="liquid" style="background:#f1c40f"></div>
-                <div class="liquid" style="background:#9b59b6"></div>
-                <div class="liquid" style="background:#3498db"></div>
-                <div class="liquid" style="background:#2ecc71"></div>
-              </div>
-              <div class="tube" style="min-height:60px"></div>
-            </div>
-          </div>
-        </div>
+        <img src="2.png" alt="Wizzy's Color Sort gameplay screenshot" class="game-screenshot"/>
       </div>
     </div>
 
@@ -573,11 +548,7 @@ footer{
       </div>
       <div class="game-visual">
         <div class="phone-glow glow-orange"></div>
-        <div class="phone-mockup">
-          <div class="phone-screen bs-screen">
-            <div class="bs-grid" id="brickGrid"></div>
-          </div>
-        </div>
+        <img src="3.png" alt="Brick Slide gameplay screenshot" class="game-screenshot"/>
       </div>
     </div>
   </div>
@@ -660,36 +631,6 @@ footer{
 </footer>
 
 <script>
-// Brick grid generation
-const grid=document.getElementById('brickGrid');
-const colors=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#f1c40f'];
-const layout=[
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0],
-  [0,0,0,1,1,1,0,0],
-  [0,0,1,1,0,0,0,0],
-  [0,1,1,1,1,0,0,0],
-  [1,1,0,1,1,1,0,0],
-  [1,1,1,1,0,1,1,0],
-  [0,1,1,1,1,1,1,0],
-  [1,1,1,1,1,0,1,1],
-  [1,1,0,1,1,1,1,1],
-  [1,1,1,1,1,1,1,1],
-];
-layout.forEach(row=>{
-  row.forEach(cell=>{
-    const d=document.createElement('div');
-    d.className='brick'+(cell?'':' brick-empty');
-    if(cell)d.style.background=colors[Math.floor(Math.random()*colors.length)];
-    grid.appendChild(d);
-  });
-});
-
 // Scroll reveal
 const revealEls=document.querySelectorAll('.reveal');
 const obs=new IntersectionObserver((entries)=>{
