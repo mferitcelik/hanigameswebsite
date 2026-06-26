@@ -4,56 +4,72 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Brick Slide – Pitch Deck | Hani Games</title>
+<link rel="icon" type="image/png" href="../logo.png"/>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     background: #0a0a0f;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  /* ── DECK ── */
+  /* ── DECK — fill the real visible viewport, no gap ── */
   #deck {
-    position: relative;
-    width: 100%; height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100dvh; /* dynamic viewport height — no chrome-bar gap */
     overflow: hidden;
   }
 
-  /* ── SLIDES – genuine left/right panel swap ── */
+  /* ── SLIDES ── */
   .slide {
     position: absolute;
     top: 0; left: 0;
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     will-change: transform;
-    /* no transition by default – JS applies it */
+  }
+
+  .slide-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .slide-inner img,
   .slide-inner video {
-    height: 100vh;
+    height: 100dvh;
     width: auto;
-    max-width: 100vw;
+    max-width: 100%;
     object-fit: contain;
     display: block;
     user-select: none;
     -webkit-user-drag: none;
+    pointer-events: none;
   }
 
-  /* ── COUNTER (top-right, no bar) ── */
+  /* video needs pointer events for tap-to-pause */
+  #slide-video { pointer-events: auto; }
+
+  /* ── COUNTER — top right, same style as video hint ── */
   #counter {
     position: fixed;
     top: 14px; right: 14px;
-    z-index: 200;
+    z-index: 300;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.6);
-    background: rgba(0,0,0,0.45);
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     padding: 5px 13px;
@@ -61,16 +77,15 @@
     pointer-events: none;
   }
 
-  /* ── NAV BUTTONS ── */
+  /* ── NAV BUTTONS — desktop only ── */
   .nav-btn {
     position: fixed;
-    top: 50%; z-index: 200;
+    top: 50%; z-index: 300;
     transform: translateY(-50%);
     background: rgba(255,255,255,0.13);
     border: 1.5px solid rgba(255,255,255,0.22);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    color: #fff;
     border-radius: 50%;
     width: 50px; height: 50px;
     display: flex; align-items: center; justify-content: center;
@@ -86,12 +101,17 @@
   #btn-next { right: 14px; }
   .nav-btn svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
+  /* hide nav arrows on touch devices — swipe is enough */
+  @media (hover: none) and (pointer: coarse) {
+    .nav-btn { display: none; }
+  }
+
   /* ── DOTS ── */
   #dots {
     position: fixed;
-    bottom: 20px; left: 50%;
+    bottom: 18px; left: 50%;
     transform: translateX(-50%);
-    z-index: 200;
+    z-index: 300;
     display: flex; gap: 9px; align-items: center;
   }
   .dot {
@@ -109,59 +129,51 @@
     border-radius: 4px;
   }
 
-  /* ── SWIPE TUTORIAL HAND ── */
-  #swipe-hint {
-    position: fixed;
-    /* vertically centred, horizontally on right side */
-    top: 50%; right: 18%;
-    transform: translateY(-50%);
-    z-index: 300;
-    pointer-events: none;
-    opacity: 0;
-  }
-  #swipe-hint img {
-    width: 72px;
-    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
-  }
-
-  /* Phase 1: fade in */
-  @keyframes handFadeIn {
-    from { opacity: 0; transform: translateY(-50%) scale(0.85); }
-    to   { opacity: 1; transform: translateY(-50%) scale(1); }
-  }
-  /* Phase 2: swipe left */
-  @keyframes handSwipe {
-    0%   { opacity: 1; transform: translateY(-50%) translateX(0); }
-    70%  { opacity: 1; transform: translateY(-50%) translateX(-110px); }
-    100% { opacity: 0; transform: translateY(-50%) translateX(-130px); }
-  }
-
-  #swipe-hint.phase-in    { animation: handFadeIn 0.45s ease forwards; }
-  #swipe-hint.phase-swipe { animation: handSwipe  0.75s cubic-bezier(0.4,0,0.2,1) forwards; }
-
   /* ── VIDEO HINT ── */
   #video-hint {
     position: fixed;
-    bottom: 54px; left: 50%;
+    bottom: 50px; left: 50%;
     transform: translateX(-50%);
-    z-index: 200;
-    color: rgba(255,255,255,0.5);
+    z-index: 300;
+    color: rgba(255,255,255,0.6);
     font-size: 11px;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
     display: none;
-    background: rgba(0,0,0,0.4);
-    padding: 4px 14px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 13px;
     border-radius: 20px;
-    backdrop-filter: blur(6px);
     pointer-events: none;
   }
 
-  @media (max-width: 600px) {
-    .nav-btn { width: 40px; height: 40px; }
-    .nav-btn svg { width: 17px; height: 17px; }
-    #btn-prev { left: 6px; }
-    #btn-next { right: 6px; }
-    #swipe-hint img { width: 58px; }
+  /* ── TUTORIAL HAND ── */
+  #swipe-hint {
+    position: fixed;
+    top: 50%; right: 12%;
+    z-index: 400;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-50%);
+  }
+  #swipe-hint img {
+    width: 68px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.55));
+    display: block;
+  }
+
+  @keyframes handLoop {
+    0%   { opacity: 0;   transform: translateY(-50%) translateX(0)     scale(0.88); }
+    12%  { opacity: 1;   transform: translateY(-50%) translateX(0)     scale(1);    }
+    30%  { opacity: 1;   transform: translateY(-50%) translateX(0)     scale(1);    }
+    75%  { opacity: 0.9; transform: translateY(-50%) translateX(-100px) scale(1);   }
+    88%  { opacity: 0;   transform: translateY(-50%) translateX(-120px) scale(1);   }
+    100% { opacity: 0;   transform: translateY(-50%) translateX(0)     scale(0.88); }
+  }
+
+  #swipe-hint.running {
+    animation: handLoop 2.2s cubic-bezier(0.4,0,0.2,1) infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -171,42 +183,33 @@
 </head>
 <body>
 
-<!-- Counter -->
 <div id="counter">1 / 4</div>
-
-<!-- Swipe hint hand -->
-<div id="swipe-hint">
-  <img src="tutorial_hand_3.png" alt=""/>
-</div>
-
-<!-- Video tap hint -->
 <div id="video-hint">Tap to play / pause</div>
+<div id="swipe-hint"><img src="tutorial_hand_3.png" alt=""/></div>
 
-<!-- Deck -->
 <div id="deck">
-  <div class="slide" data-index="0" style="transform:translateX(0%)">
+  <div class="slide" data-index="0">
     <div class="slide-inner">
-      <img src="slide1.jpg" alt="Brick Slide Cover" draggable="false"/>
+      <img src="slide1.jpg" alt="Brick Slide Cover" draggable="false" id="slide1-img"/>
     </div>
   </div>
-  <div class="slide" data-index="1" style="transform:translateX(100%)">
+  <div class="slide" data-index="1">
     <div class="slide-inner">
       <video src="slide2.mp4" id="slide-video" loop muted playsinline preload="auto"></video>
     </div>
   </div>
-  <div class="slide" data-index="2" style="transform:translateX(200%)">
+  <div class="slide" data-index="2">
     <div class="slide-inner">
       <img src="slide3.jpg" alt="LiveOps & Monetization" draggable="false"/>
     </div>
   </div>
-  <div class="slide" data-index="3" style="transform:translateX(300%)">
+  <div class="slide" data-index="3">
     <div class="slide-inner">
       <img src="slide4.jpg" alt="Team & Contact" draggable="false"/>
     </div>
   </div>
 </div>
 
-<!-- Nav -->
 <button class="nav-btn hidden" id="btn-prev" aria-label="Previous">
   <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
 </button>
@@ -214,7 +217,6 @@
   <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
 </button>
 
-<!-- Dots -->
 <div id="dots">
   <div class="dot active" data-i="0"></div>
   <div class="dot" data-i="1"></div>
@@ -224,33 +226,32 @@
 
 <script>
   const TOTAL   = 4;
-  const DUR     = 380; // transition ms
+  const DUR     = 360;
   let current   = 0;
   let busy      = false;
+  let hasSwipedOnce = false;
 
-  const slides  = Array.from(document.querySelectorAll('.slide'));
-  const dots    = document.querySelectorAll('.dot');
-  const btnPrev = document.getElementById('btn-prev');
-  const btnNext = document.getElementById('btn-next');
-  const counter = document.getElementById('counter');
-  const videoEl = document.getElementById('slide-video');
-  const hint    = document.getElementById('video-hint');
-  const hand    = document.getElementById('swipe-hint');
+  const slides   = Array.from(document.querySelectorAll('.slide'));
+  const dots     = document.querySelectorAll('.dot');
+  const btnPrev  = document.getElementById('btn-prev');
+  const btnNext  = document.getElementById('btn-next');
+  const counter  = document.getElementById('counter');
+  const videoEl  = document.getElementById('slide-video');
+  const hint     = document.getElementById('video-hint');
+  const hand     = document.getElementById('swipe-hint');
+  const slide1   = document.getElementById('slide1-img');
 
-  /* ── position all slides instantly (no animation) ── */
+  /* ── position slides ── */
   function positionAll(animated) {
     slides.forEach((s, i) => {
-      const offset = (i - current) * 100;
-      if (animated) {
-        s.style.transition = `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`;
-      } else {
-        s.style.transition = 'none';
-      }
-      s.style.transform = `translateX(${offset}%)`;
+      s.style.transition = animated
+        ? `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`
+        : 'none';
+      s.style.transform = `translateX(${(i - current) * 100}%)`;
     });
   }
 
-  function goTo(index, dir) {
+  function goTo(index) {
     if (busy || index === current || index < 0 || index >= TOTAL) return;
     busy = true;
 
@@ -268,7 +269,7 @@
     setTimeout(() => {
       slides.forEach(s => s.style.transition = 'none');
       busy = false;
-    }, DUR + 20);
+    }, DUR + 30);
   }
 
   function updateUI() {
@@ -278,110 +279,122 @@
     btnNext.classList.toggle('hidden', current === TOTAL - 1);
   }
 
-  /* tap video */
   videoEl.addEventListener('click', () => {
     if (videoEl.paused) videoEl.play(); else videoEl.pause();
   });
 
-  /* buttons */
-  btnPrev.addEventListener('click', () => goTo(current - 1, -1));
-  btnNext.addEventListener('click', () => goTo(current + 1,  1));
+  btnPrev.addEventListener('click', () => goTo(current - 1));
+  btnNext.addEventListener('click', () => goTo(current + 1));
+  dots.forEach(d => d.addEventListener('click', () => goTo(parseInt(d.dataset.i))));
 
-  /* dots */
-  dots.forEach(d => d.addEventListener('click', () => {
-    const i = parseInt(d.dataset.i);
-    goTo(i, i > current ? 1 : -1);
-  }));
-
-  /* keyboard */
   document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1,  1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, -1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
   });
 
-  /* ── DRAG / SWIPE ── */
-  let dragStartX = 0, dragStartY = 0, dragging = false, dragDelta = 0;
+  /* ── DRAG / SWIPE with slide-1 parallax ── */
+  let startX = 0, startY = 0, dragging = false, delta = 0;
+  const PARALLAX = 0.18; // how much slide1 moves during hand animation
 
-  function onDragStart(x, y) {
-    dragStartX = x; dragStartY = y;
-    dragging = true; dragDelta = 0;
+  function dragStart(x, y) {
+    startX = x; startY = y; dragging = true; delta = 0;
     slides.forEach(s => s.style.transition = 'none');
   }
 
-  function onDragMove(x) {
+  function dragMove(x) {
     if (!dragging) return;
-    dragDelta = x - dragStartX;
+    delta = x - startX;
     slides.forEach((s, i) => {
-      const base = (i - current) * 100;
-      const px   = base + dragDelta / window.innerWidth * 100;
+      const px = (i - current) * 100 + (delta / window.innerWidth * 100);
       s.style.transform = `translateX(${px}%)`;
     });
   }
 
-  function onDragEnd() {
+  function dragEnd() {
     if (!dragging) return;
     dragging = false;
-    const threshold = window.innerWidth * 0.2;
-    if (dragDelta < -threshold && current < TOTAL - 1) {
-      goTo(current + 1, 1);
-    } else if (dragDelta > threshold && current > 0) {
-      goTo(current - 1, -1);
+    const threshold = window.innerWidth * 0.18;
+
+    if (delta < -threshold && current < TOTAL - 1) {
+      if (!hasSwipedOnce) stopHand();
+      goTo(current + 1);
+    } else if (delta > threshold && current > 0) {
+      if (!hasSwipedOnce) stopHand();
+      goTo(current - 1);
     } else {
-      /* snap back */
-      slides.forEach(s => s.style.transition = `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`);
+      slides.forEach(s => {
+        s.style.transition = `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`;
+      });
       positionAll(true);
-      setTimeout(() => slides.forEach(s => s.style.transition = 'none'), DUR + 20);
+      setTimeout(() => slides.forEach(s => s.style.transition = 'none'), DUR + 30);
     }
   }
 
   /* touch */
-  document.addEventListener('touchstart', e => {
-    onDragStart(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-
+  document.addEventListener('touchstart', e => dragStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
   document.addEventListener('touchmove', e => {
     if (!dragging) return;
-    const dy = Math.abs(e.touches[0].clientY - dragStartY);
-    const dx = Math.abs(e.touches[0].clientX - dragStartX);
-    if (dy > dx * 1.2) { dragging = false; positionAll(false); return; }
-    onDragMove(e.touches[0].clientX);
+    const dy = Math.abs(e.touches[0].clientY - startY);
+    const dx = Math.abs(e.touches[0].clientX - startX);
+    if (dy > dx * 1.3) { dragging = false; positionAll(false); return; }
+    dragMove(e.touches[0].clientX);
   }, { passive: true });
+  document.addEventListener('touchend', () => dragEnd());
 
-  document.addEventListener('touchend', e => onDragEnd());
+  /* mouse */
+  document.addEventListener('mousedown', e => dragStart(e.clientX, e.clientY));
+  document.addEventListener('mousemove', e => { if (dragging) dragMove(e.clientX); });
+  document.addEventListener('mouseup',   () => dragEnd());
 
-  /* mouse (desktop drag) */
-  document.addEventListener('mousedown', e => onDragStart(e.clientX, e.clientY));
-  document.addEventListener('mousemove', e => { if (dragging) onDragMove(e.clientX); });
-  document.addEventListener('mouseup',   () => onDragEnd());
+  /* ── TUTORIAL HAND ── */
+  let handTimer = null;
 
-  /* ── SWIPE TUTORIAL HAND ── */
-  function runHandTutorial() {
-    /* fade in */
-    hand.style.opacity = '0';
-    hand.className = '';
-    void hand.offsetWidth; /* reflow */
-    hand.classList.add('phase-in');
-
-    /* after fade-in (450ms) → pause 400ms → swipe */
-    setTimeout(() => {
-      hand.classList.remove('phase-in');
-      hand.style.opacity = '1';
-
-      setTimeout(() => {
-        hand.classList.add('phase-swipe');
-        /* clean up after swipe done */
-        setTimeout(() => {
-          hand.className = '';
-          hand.style.opacity = '0';
-        }, 800);
-      }, 400);
-
-    }, 450);
+  function startHand() {
+    if (hasSwipedOnce) return;
+    /* parallax: during the 2.2s loop, nudge slide1 slightly left then back */
+    animateParallax();
+    hand.classList.add('running');
   }
 
-  /* trigger 3 s after page load, only on slide 0 */
-  setTimeout(() => {
-    if (current === 0) runHandTutorial();
+  function stopHand() {
+    hasSwipedOnce = true;
+    hand.classList.remove('running');
+    hand.style.opacity = '0';
+    clearTimeout(handTimer);
+  }
+
+  /* subtle parallax on slide1 image synced to hand loop */
+  function animateParallax() {
+    if (hasSwipedOnce || current !== 0) return;
+    const LOOP = 2200; // ms, matches handLoop
+    const TRAVEL = 18; // px
+    const start = performance.now();
+
+    function tick(now) {
+      if (hasSwipedOnce || current !== 0) {
+        slide1.style.transform = '';
+        return;
+      }
+      const t = ((now - start) % LOOP) / LOOP; // 0..1
+      // mirror the hand: ease in at ~30%, move left 30-75%, ease out 75-88%
+      let offset = 0;
+      if (t < 0.30) {
+        offset = 0;
+      } else if (t < 0.75) {
+        const p = (t - 0.30) / 0.45;
+        offset = -TRAVEL * Math.sin(p * Math.PI);
+      } else {
+        offset = 0;
+      }
+      slide1.style.transform = `translateX(${offset}px)`;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* start hand 3s after load */
+  handTimer = setTimeout(() => {
+    if (current === 0 && !hasSwipedOnce) startHand();
   }, 3000);
 
   /* ── INIT ── */
