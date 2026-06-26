@@ -12,21 +12,16 @@
     background: #0a0a0f;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    touch-action: pan-y;
   }
 
-  /* ── DECK WRAPPER ── */
+  /* ── DECK ── */
   #deck {
     position: relative;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%; height: 100vh;
     overflow: hidden;
   }
 
-  /* ── SLIDES ── */
+  /* ── SLIDES – genuine left/right panel swap ── */
   .slide {
     position: absolute;
     top: 0; left: 0;
@@ -34,31 +29,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    transform: translateX(60px);
-  }
-  .slide.active {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateX(0);
-  }
-  .slide.exit-left  { opacity: 0; transform: translateX(-60px); }
-  .slide.exit-right { opacity: 0; transform: translateX(60px); }
-
-  /* ── SLIDE CONTENT ── */
-  .slide-inner {
-    position: relative;
-    height: 100vh;
-    width: auto;
-    max-width: 100vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    will-change: transform;
+    /* no transition by default – JS applies it */
   }
 
-  .slide-inner img {
+  .slide-inner img,
+  .slide-inner video {
     height: 100vh;
     width: auto;
     max-width: 100vw;
@@ -68,186 +44,173 @@
     -webkit-user-drag: none;
   }
 
-  /* Video slide */
-  .slide-inner video {
-    height: 100vh;
-    width: auto;
-    max-width: 100vw;
-    object-fit: contain;
-    display: block;
+  /* ── COUNTER (top-right, no bar) ── */
+  #counter {
+    position: fixed;
+    top: 14px; right: 14px;
+    z-index: 200;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 13px;
+    border-radius: 20px;
+    pointer-events: none;
   }
 
   /* ── NAV BUTTONS ── */
   .nav-btn {
     position: fixed;
-    top: 50%;
+    top: 50%; z-index: 200;
     transform: translateY(-50%);
-    z-index: 100;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.13);
     border: 1.5px solid rgba(255,255,255,0.22);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     color: #fff;
     border-radius: 50%;
-    width: 52px; height: 52px;
+    width: 50px; height: 50px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s, opacity 0.3s;
+    transition: background 0.2s, border-color 0.2s, opacity 0.25s;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
-  .nav-btn:hover { background: rgba(245,130,13,0.5); border-color: rgba(245,130,13,0.7); }
-  .nav-btn:active { transform: translateY(-50%) scale(0.92); }
+  .nav-btn:hover  { background: rgba(245,130,13,0.55); border-color: rgba(245,130,13,0.8); }
+  .nav-btn:active { background: rgba(245,130,13,0.75); }
   .nav-btn.hidden { opacity: 0; pointer-events: none; }
-
-  #btn-prev { left: 16px; }
-  #btn-next { right: 16px; }
-
-  .nav-btn svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  #btn-prev { left: 14px; }
+  #btn-next { right: 14px; }
+  .nav-btn svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ── DOTS ── */
   #dots {
     position: fixed;
-    bottom: 22px;
-    left: 50%;
+    bottom: 20px; left: 50%;
     transform: translateX(-50%);
-    z-index: 100;
-    display: flex;
-    gap: 10px;
-    align-items: center;
+    z-index: 200;
+    display: flex; gap: 9px; align-items: center;
   }
   .dot {
-    width: 8px; height: 8px;
+    height: 7px; width: 7px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-    border: 1.5px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.28);
+    border: 1.5px solid rgba(255,255,255,0.38);
     cursor: pointer;
-    transition: background 0.25s, transform 0.25s, width 0.25s;
+    transition: background 0.25s, width 0.25s, border-color 0.25s, border-radius 0.25s;
   }
   .dot.active {
     background: #f5820d;
     border-color: #f5820d;
-    width: 24px;
+    width: 22px;
     border-radius: 4px;
-    transform: none;
   }
 
-  /* ── SLIDE COUNT ── */
-  #counter {
+  /* ── SWIPE TUTORIAL HAND ── */
+  #swipe-hint {
     position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 100;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.5);
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(8px);
-    padding: 5px 12px;
-    border-radius: 20px;
+    /* vertically centred, horizontally on right side */
+    top: 50%; right: 18%;
+    transform: translateY(-50%);
+    z-index: 300;
+    pointer-events: none;
+    opacity: 0;
+  }
+  #swipe-hint img {
+    width: 72px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
   }
 
-  /* ── BRANDING ── */
-  #brand {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 100;
+  /* Phase 1: fade in */
+  @keyframes handFadeIn {
+    from { opacity: 0; transform: translateY(-50%) scale(0.85); }
+    to   { opacity: 1; transform: translateY(-50%) scale(1); }
   }
-  #brand img {
-    height: 28px;
-    width: auto;
-    opacity: 0.85;
-    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6));
+  /* Phase 2: swipe left */
+  @keyframes handSwipe {
+    0%   { opacity: 1; transform: translateY(-50%) translateX(0); }
+    70%  { opacity: 1; transform: translateY(-50%) translateX(-110px); }
+    100% { opacity: 0; transform: translateY(-50%) translateX(-130px); }
   }
 
-  /* ── VIDEO CONTROLS HINT ── */
+  #swipe-hint.phase-in    { animation: handFadeIn 0.45s ease forwards; }
+  #swipe-hint.phase-swipe { animation: handSwipe  0.75s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+  /* ── VIDEO HINT ── */
   #video-hint {
     position: fixed;
-    bottom: 58px;
-    left: 50%;
+    bottom: 54px; left: 50%;
     transform: translateX(-50%);
-    z-index: 100;
-    color: rgba(255,255,255,0.45);
+    z-index: 200;
+    color: rgba(255,255,255,0.5);
     font-size: 11px;
     letter-spacing: 0.5px;
     display: none;
     background: rgba(0,0,0,0.4);
-    padding: 4px 12px;
+    padding: 4px 14px;
     border-radius: 20px;
     backdrop-filter: blur(6px);
+    pointer-events: none;
   }
 
-  /* ── MOBILE ── */
   @media (max-width: 600px) {
-    .nav-btn { width: 42px; height: 42px; }
-    .nav-btn svg { width: 18px; height: 18px; }
-    #btn-prev { left: 8px; }
-    #btn-next { right: 8px; }
-    #brand img { height: 22px; }
+    .nav-btn { width: 40px; height: 40px; }
+    .nav-btn svg { width: 17px; height: 17px; }
+    #btn-prev { left: 6px; }
+    #btn-next { right: 6px; }
+    #swipe-hint img { width: 58px; }
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .slide { transition: opacity 0.2s; transform: none !important; }
+    #swipe-hint { display: none !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- Branding -->
-<div id="brand">
-  <img src="../logo.png" alt="Hani Games"/>
-</div>
-
-<!-- Slide counter -->
+<!-- Counter -->
 <div id="counter">1 / 4</div>
 
-<!-- Video hint (shown on slide 2) -->
-<div id="video-hint">Tap video to play / pause</div>
+<!-- Swipe hint hand -->
+<div id="swipe-hint">
+  <img src="tutorial_hand_3.png" alt=""/>
+</div>
+
+<!-- Video tap hint -->
+<div id="video-hint">Tap to play / pause</div>
 
 <!-- Deck -->
 <div id="deck">
-
-  <div class="slide active" data-index="0">
+  <div class="slide" data-index="0" style="transform:translateX(0%)">
     <div class="slide-inner">
-      <img src="slide1.jpg" alt="Brick Slide – Pitch Deck Cover" draggable="false"/>
+      <img src="slide1.jpg" alt="Brick Slide Cover" draggable="false"/>
     </div>
   </div>
-
-  <div class="slide" data-index="1">
+  <div class="slide" data-index="1" style="transform:translateX(100%)">
     <div class="slide-inner">
-      <video
-        src="slide2.mp4"
-        loop
-        muted
-        playsinline
-        preload="auto"
-        id="slide-video"
-        onclick="toggleVideoPlay()"
-      ></video>
+      <video src="slide2.mp4" id="slide-video" loop muted playsinline preload="auto"></video>
     </div>
   </div>
-
-  <div class="slide" data-index="2">
+  <div class="slide" data-index="2" style="transform:translateX(200%)">
     <div class="slide-inner">
-      <img src="slide3.jpg" alt="Brick Slide – LiveOps & Monetization" draggable="false"/>
+      <img src="slide3.jpg" alt="LiveOps & Monetization" draggable="false"/>
     </div>
   </div>
-
-  <div class="slide" data-index="3">
+  <div class="slide" data-index="3" style="transform:translateX(300%)">
     <div class="slide-inner">
-      <img src="slide4.jpg" alt="Brick Slide – Team & Contact" draggable="false"/>
+      <img src="slide4.jpg" alt="Team & Contact" draggable="false"/>
     </div>
   </div>
-
 </div>
 
-<!-- Navigation -->
-<button class="nav-btn hidden" id="btn-prev" aria-label="Previous slide">
+<!-- Nav -->
+<button class="nav-btn hidden" id="btn-prev" aria-label="Previous">
   <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
 </button>
-<button class="nav-btn" id="btn-next" aria-label="Next slide">
+<button class="nav-btn" id="btn-next" aria-label="Next">
   <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
 </button>
 
@@ -260,100 +223,170 @@
 </div>
 
 <script>
-  const TOTAL = 4;
-  let current = 0;
-  let isAnimating = false;
+  const TOTAL   = 4;
+  const DUR     = 380; // transition ms
+  let current   = 0;
+  let busy      = false;
 
-  const slides   = document.querySelectorAll('.slide');
-  const dots     = document.querySelectorAll('.dot');
-  const btnPrev  = document.getElementById('btn-prev');
-  const btnNext  = document.getElementById('btn-next');
-  const counter  = document.getElementById('counter');
-  const videoEl  = document.getElementById('slide-video');
-  const hint     = document.getElementById('video-hint');
+  const slides  = Array.from(document.querySelectorAll('.slide'));
+  const dots    = document.querySelectorAll('.dot');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const counter = document.getElementById('counter');
+  const videoEl = document.getElementById('slide-video');
+  const hint    = document.getElementById('video-hint');
+  const hand    = document.getElementById('swipe-hint');
 
-  function goTo(index, dir = 1) {
-    if (isAnimating || index === current || index < 0 || index >= TOTAL) return;
-    isAnimating = true;
+  /* ── position all slides instantly (no animation) ── */
+  function positionAll(animated) {
+    slides.forEach((s, i) => {
+      const offset = (i - current) * 100;
+      if (animated) {
+        s.style.transition = `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`;
+      } else {
+        s.style.transition = 'none';
+      }
+      s.style.transform = `translateX(${offset}%)`;
+    });
+  }
 
-    const from = current;
-    const to   = index;
+  function goTo(index, dir) {
+    if (busy || index === current || index < 0 || index >= TOTAL) return;
+    busy = true;
 
-    // Pause video if leaving slide 2
-    if (from === 1) { videoEl.pause(); hint.style.display = 'none'; }
+    if (current === 1) { videoEl.pause(); hint.style.display = 'none'; }
 
-    // Exit current
-    slides[from].classList.remove('active');
-    slides[from].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+    current = index;
+    positionAll(true);
+    updateUI();
 
-    // Enter next
-    slides[to].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
-    slides[to].classList.add('active');
-
-    setTimeout(() => {
-      slides[from].classList.remove('exit-left', 'exit-right');
-      slides[to].style.transform = '';
-      isAnimating = false;
-    }, 420);
-
-    current = to;
-    update();
-
-    // Autoplay video when entering slide 2
-    if (to === 1) {
+    if (current === 1) {
       videoEl.play().catch(() => {});
       hint.style.display = 'block';
     }
+
+    setTimeout(() => {
+      slides.forEach(s => s.style.transition = 'none');
+      busy = false;
+    }, DUR + 20);
   }
 
-  function update() {
+  function updateUI() {
     counter.textContent = `${current + 1} / ${TOTAL}`;
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
     btnPrev.classList.toggle('hidden', current === 0);
     btnNext.classList.toggle('hidden', current === TOTAL - 1);
   }
 
-  function toggleVideoPlay() {
-    if (videoEl.paused) videoEl.play();
-    else videoEl.pause();
-  }
+  /* tap video */
+  videoEl.addEventListener('click', () => {
+    if (videoEl.paused) videoEl.play(); else videoEl.pause();
+  });
 
-  // Button clicks
+  /* buttons */
   btnPrev.addEventListener('click', () => goTo(current - 1, -1));
   btnNext.addEventListener('click', () => goTo(current + 1,  1));
 
-  // Dot clicks
+  /* dots */
   dots.forEach(d => d.addEventListener('click', () => {
     const i = parseInt(d.dataset.i);
     goTo(i, i > current ? 1 : -1);
   }));
 
-  // Keyboard
+  /* keyboard */
   document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  goTo(current + 1,  1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    goTo(current - 1, -1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1,  1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, -1);
   });
 
-  // Touch / swipe
-  let touchStartX = 0;
-  let touchStartY = 0;
+  /* ── DRAG / SWIPE ── */
+  let dragStartX = 0, dragStartY = 0, dragging = false, dragDelta = 0;
 
+  function onDragStart(x, y) {
+    dragStartX = x; dragStartY = y;
+    dragging = true; dragDelta = 0;
+    slides.forEach(s => s.style.transition = 'none');
+  }
+
+  function onDragMove(x) {
+    if (!dragging) return;
+    dragDelta = x - dragStartX;
+    slides.forEach((s, i) => {
+      const base = (i - current) * 100;
+      const px   = base + dragDelta / window.innerWidth * 100;
+      s.style.transform = `translateX(${px}%)`;
+    });
+  }
+
+  function onDragEnd() {
+    if (!dragging) return;
+    dragging = false;
+    const threshold = window.innerWidth * 0.2;
+    if (dragDelta < -threshold && current < TOTAL - 1) {
+      goTo(current + 1, 1);
+    } else if (dragDelta > threshold && current > 0) {
+      goTo(current - 1, -1);
+    } else {
+      /* snap back */
+      slides.forEach(s => s.style.transition = `transform ${DUR}ms cubic-bezier(0.35,0,0.15,1)`);
+      positionAll(true);
+      setTimeout(() => slides.forEach(s => s.style.transition = 'none'), DUR + 20);
+    }
+  }
+
+  /* touch */
   document.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
+    onDragStart(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
 
-  document.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) < Math.abs(dy) * 0.8) return; // mostly vertical, ignore
-    if (Math.abs(dx) < 40) return; // too short
-    if (dx < 0) goTo(current + 1,  1);
-    else         goTo(current - 1, -1);
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dy = Math.abs(e.touches[0].clientY - dragStartY);
+    const dx = Math.abs(e.touches[0].clientX - dragStartX);
+    if (dy > dx * 1.2) { dragging = false; positionAll(false); return; }
+    onDragMove(e.touches[0].clientX);
   }, { passive: true });
 
-  // Init
-  update();
+  document.addEventListener('touchend', e => onDragEnd());
+
+  /* mouse (desktop drag) */
+  document.addEventListener('mousedown', e => onDragStart(e.clientX, e.clientY));
+  document.addEventListener('mousemove', e => { if (dragging) onDragMove(e.clientX); });
+  document.addEventListener('mouseup',   () => onDragEnd());
+
+  /* ── SWIPE TUTORIAL HAND ── */
+  function runHandTutorial() {
+    /* fade in */
+    hand.style.opacity = '0';
+    hand.className = '';
+    void hand.offsetWidth; /* reflow */
+    hand.classList.add('phase-in');
+
+    /* after fade-in (450ms) → pause 400ms → swipe */
+    setTimeout(() => {
+      hand.classList.remove('phase-in');
+      hand.style.opacity = '1';
+
+      setTimeout(() => {
+        hand.classList.add('phase-swipe');
+        /* clean up after swipe done */
+        setTimeout(() => {
+          hand.className = '';
+          hand.style.opacity = '0';
+        }, 800);
+      }, 400);
+
+    }, 450);
+  }
+
+  /* trigger 3 s after page load, only on slide 0 */
+  setTimeout(() => {
+    if (current === 0) runHandTutorial();
+  }, 3000);
+
+  /* ── INIT ── */
+  positionAll(false);
+  updateUI();
 </script>
 </body>
 </html>
