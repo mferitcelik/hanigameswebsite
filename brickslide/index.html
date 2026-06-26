@@ -1,1 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Brick Slide – Pitch Deck | Hani Games</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    width: 100%; height: 100%;
+    background: #0a0a0f;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    touch-action: pan-y;
+  }
+
+  /* ── DECK WRAPPER ── */
+  #deck {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── SLIDES ── */
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateX(60px);
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .slide.exit-left  { opacity: 0; transform: translateX(-60px); }
+  .slide.exit-right { opacity: 0; transform: translateX(60px); }
+
+  /* ── SLIDE CONTENT ── */
+  .slide-inner {
+    position: relative;
+    height: 100vh;
+    width: auto;
+    max-width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-inner img {
+    height: 100vh;
+    width: auto;
+    max-width: 100vw;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Video slide */
+  .slide-inner video {
+    height: 100vh;
+    width: auto;
+    max-width: 100vw;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #fff;
+    border-radius: 50%;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, opacity 0.3s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:hover { background: rgba(245,130,13,0.5); border-color: rgba(245,130,13,0.7); }
+  .nav-btn:active { transform: translateY(-50%) scale(0.92); }
+  .nav-btn.hidden { opacity: 0; pointer-events: none; }
+
+  #btn-prev { left: 16px; }
+  #btn-next { right: 16px; }
+
+  .nav-btn svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── DOTS ── */
+  #dots {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: background 0.25s, transform 0.25s, width 0.25s;
+  }
+  .dot.active {
+    background: #f5820d;
+    border-color: #f5820d;
+    width: 24px;
+    border-radius: 4px;
+    transform: none;
+  }
+
+  /* ── SLIDE COUNT ── */
+  #counter {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* ── BRANDING ── */
+  #brand {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 100;
+  }
+  #brand img {
+    height: 28px;
+    width: auto;
+    opacity: 0.85;
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6));
+  }
+
+  /* ── VIDEO CONTROLS HINT ── */
+  #video-hint {
+    position: fixed;
+    bottom: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    display: none;
+    background: rgba(0,0,0,0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    .nav-btn { width: 42px; height: 42px; }
+    .nav-btn svg { width: 18px; height: 18px; }
+    #btn-prev { left: 8px; }
+    #btn-next { right: 8px; }
+    #brand img { height: 22px; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.2s; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Branding -->
+<div id="brand">
+  <img src="../logo.png" alt="Hani Games"/>
+</div>
+
+<!-- Slide counter -->
+<div id="counter">1 / 4</div>
+
+<!-- Video hint (shown on slide 2) -->
+<div id="video-hint">Tap video to play / pause</div>
+
+<!-- Deck -->
+<div id="deck">
+
+  <div class="slide active" data-index="0">
+    <div class="slide-inner">
+      <img src="slide1.jpg" alt="Brick Slide – Pitch Deck Cover" draggable="false"/>
+    </div>
+  </div>
+
+  <div class="slide" data-index="1">
+    <div class="slide-inner">
+      <video
+        src="slide2.mp4"
+        loop
+        muted
+        playsinline
+        preload="auto"
+        id="slide-video"
+        onclick="toggleVideoPlay()"
+      ></video>
+    </div>
+  </div>
+
+  <div class="slide" data-index="2">
+    <div class="slide-inner">
+      <img src="slide3.jpg" alt="Brick Slide – LiveOps & Monetization" draggable="false"/>
+    </div>
+  </div>
+
+  <div class="slide" data-index="3">
+    <div class="slide-inner">
+      <img src="slide4.jpg" alt="Brick Slide – Team & Contact" draggable="false"/>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<button class="nav-btn hidden" id="btn-prev" aria-label="Previous slide">
+  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+</button>
+<button class="nav-btn" id="btn-next" aria-label="Next slide">
+  <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+</button>
+
+<!-- Dots -->
+<div id="dots">
+  <div class="dot active" data-i="0"></div>
+  <div class="dot" data-i="1"></div>
+  <div class="dot" data-i="2"></div>
+  <div class="dot" data-i="3"></div>
+</div>
+
+<script>
+  const TOTAL = 4;
+  let current = 0;
+  let isAnimating = false;
+
+  const slides   = document.querySelectorAll('.slide');
+  const dots     = document.querySelectorAll('.dot');
+  const btnPrev  = document.getElementById('btn-prev');
+  const btnNext  = document.getElementById('btn-next');
+  const counter  = document.getElementById('counter');
+  const videoEl  = document.getElementById('slide-video');
+  const hint     = document.getElementById('video-hint');
+
+  function goTo(index, dir = 1) {
+    if (isAnimating || index === current || index < 0 || index >= TOTAL) return;
+    isAnimating = true;
+
+    const from = current;
+    const to   = index;
+
+    // Pause video if leaving slide 2
+    if (from === 1) { videoEl.pause(); hint.style.display = 'none'; }
+
+    // Exit current
+    slides[from].classList.remove('active');
+    slides[from].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+
+    // Enter next
+    slides[to].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+    slides[to].classList.add('active');
+
+    setTimeout(() => {
+      slides[from].classList.remove('exit-left', 'exit-right');
+      slides[to].style.transform = '';
+      isAnimating = false;
+    }, 420);
+
+    current = to;
+    update();
+
+    // Autoplay video when entering slide 2
+    if (to === 1) {
+      videoEl.play().catch(() => {});
+      hint.style.display = 'block';
+    }
+  }
+
+  function update() {
+    counter.textContent = `${current + 1} / ${TOTAL}`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    btnPrev.classList.toggle('hidden', current === 0);
+    btnNext.classList.toggle('hidden', current === TOTAL - 1);
+  }
+
+  function toggleVideoPlay() {
+    if (videoEl.paused) videoEl.play();
+    else videoEl.pause();
+  }
+
+  // Button clicks
+  btnPrev.addEventListener('click', () => goTo(current - 1, -1));
+  btnNext.addEventListener('click', () => goTo(current + 1,  1));
+
+  // Dot clicks
+  dots.forEach(d => d.addEventListener('click', () => {
+    const i = parseInt(d.dataset.i);
+    goTo(i, i > current ? 1 : -1);
+  }));
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  goTo(current + 1,  1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    goTo(current - 1, -1);
+  });
+
+  // Touch / swipe
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < Math.abs(dy) * 0.8) return; // mostly vertical, ignore
+    if (Math.abs(dx) < 40) return; // too short
+    if (dx < 0) goTo(current + 1,  1);
+    else         goTo(current - 1, -1);
+  }, { passive: true });
+
+  // Init
+  update();
+</script>
+</body>
+</html>
