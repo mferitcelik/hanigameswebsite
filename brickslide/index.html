@@ -233,8 +233,8 @@
   }
 
   videoEl.addEventListener('click', () => { if (videoEl.paused) videoEl.play(); else videoEl.pause(); });
-  btnPrev.addEventListener('click', () => goTo(current - 1));
-  btnNext.addEventListener('click', () => goTo(current + 1));
+  btnPrev.addEventListener('click', () => { stopHand(); goTo(current - 1); });
+  btnNext.addEventListener('click', () => { stopHand(); goTo(current + 1); });
   dots.forEach(d => d.addEventListener('click', () => goTo(parseInt(d.dataset.i))));
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
